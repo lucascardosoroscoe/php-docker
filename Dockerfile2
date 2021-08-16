@@ -1,0 +1,41 @@
+FROM ubuntu:16.04
+
+# update package list
+RUN apt-get update
+
+# install curl and git
+RUN apt-get install -y curl git
+
+# install apache
+RUN apt-get install -y apache2
+
+# install php
+RUN apt-get -y install php mcrypt php-mcrypt php-mbstring php-pear php-dev php-xml
+RUN apt-get install -y libapache2-mod-php
+
+#Instala o DBLIB
+RUN apt-get install -y php-pdo-dblib
+
+
+RUN apt-get install -y unixodbc unixodbc-dev gcc nano wget make
+RUN apt-get update
+RUN wget http://cdn1.netmake.com.br/download/freetds-0.95.95.tar.gz
+RUN tar -zxf freetds-0.95.95.tar.gz
+
+# install locales
+RUN apt-get install -y locales && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen
+
+
+
+CMD ["cd freetds-0.95.95 "]
+CMD ["./configure --with-tdsver=7.4 --with-unixodbc=/usr --disable-libiconv --disable-static --disable-threadsafe --enable-msdblib --disable-sspi --with-gnu-ld --enable-sybase-compat && make && make install"]
+CMD ["cd ../"]
+# RUN nano /usr/local/etc/freetds.conf
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+
+
+WORKDIR /var/www/html/
+RUN rm index.html
+COPY app/ /var/www/html/
+
